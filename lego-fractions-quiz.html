@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>לגו שברים - דף תרגול</title>
+  <style>
+    :root {
+      --bg:#f7f6f2; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --accent:#0f766e; --accent2:#f59e0b; --line:#d6d3d1;
+    }
+    body{font-family:Arial,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:24px;line-height:1.6}
+    .wrap{max-width:900px;margin:auto}
+    .hero{background:linear-gradient(135deg,#ecfeff,#fff7ed);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:20px}
+    h1{margin:0 0 8px;font-size:2rem}
+    .sub{color:var(--muted)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+    .q{font-weight:700;margin-bottom:10px}
+    .opts label{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;cursor:pointer;background:#fafaf9}
+    .opts input{margin-left:8px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+    button{background:var(--accent);color:white;border:none;border-radius:12px;padding:12px 18px;font-size:1rem;cursor:pointer}
+    button.secondary{background:var(--accent2);color:#111827}
+    .result{margin-top:20px;font-size:1.1rem;font-weight:700}
+    .explain{margin-top:8px;color:var(--muted);font-size:.95rem}
+    .badge{display:inline-block;background:#ccfbf1;color:#115e59;border-radius:999px;padding:4px 10px;font-size:.9rem;margin-bottom:10px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="badge">תרגול לשבוע שלפני חנות הלגו</div>
+    <h1>כפל וחילוק שברים בעולם הלגו</h1>
+    <div class="sub">10 שאלות קצרות על מלאי, קופסאות וחלקים. בסוף תקבל ניקוד.</div>
+  </div>
+  <form id="quiz"></form>
+  <div class="actions">
+    <button type="button" onclick="gradeQuiz()">בדוק תשובות</button>
+    <button type="button" class="secondary" onclick="resetQuiz()">נקה ובדוק שוב</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+<script>
+const questions = [
+  {q:'במחסן יש 12 קופסאות נינג׳גו. שליש מהן נמצאות על המדף הקדמי. כמה קופסאות זה?', opts:['2','3','4','6'], a:2, e:'שליש מ-12 הוא 4.'},
+  {q:'יש 3/4 קופסה של חלקי לגו, ובכל קופסה מלאה יש 20 חלקים. כמה חלקים יש ב-3/4 קופסה?', opts:['5','10','15','18'], a:2, e:'20 כפול 3/4 שווה 15.'},
+  {q:'המוכר חילק 1/2 מארז ל-4 ילדים בצורה שווה. איזה חלק מהמארז קיבל כל ילד?', opts:['1/8','1/6','1/4','1/2'], a:0, e:'חצי מחולק ל-4 שווה שמינית.'},
+  {q:'יש 18 שקיות מדבקות לסטים. 2/3 מהן שייכות לסטאר וורז. כמה שקיות שייכות לסטאר וורז?', opts:['6','9','12','15'], a:2, e:'18 כפול 2/3 שווה 12.'},
+  {q:'אם 1/4 קופסה מכילה 6 דמויות קטנות, כמה דמויות יש בקופסה מלאה?', opts:['12','18','24','30'], a:2, e:'אם רבע הוא 6, השלם הוא 24.'},
+  {q:'במדף מיוחד מוצגות 5/6 מהקופסאות מתוך 30 קופסאות. כמה קופסאות מוצגות?', opts:['20','22','25','26'], a:2, e:'30 כפול 5/6 שווה 25.'},
+  {q:'יש 2/3 ארגז קוביות, ומחלקים אותו ל-2 ילדים שווה בשווה. איזה חלק מהארגז יקבל כל ילד?', opts:['1/6','1/3','2/5','2/6'], a:1, e:'2/3 חלקי 2 שווה 1/3.'},
+  {q:'אם 1/5 ממלאי המיני-פיגרים הוא 8, מהו כל המלאי?', opts:['20','24','32','40'], a:3, e:'אם חמישית היא 8, כל המלאי הוא 40.'},
+  {q:'יש 16 שקיות חלקים, ו-3/4 מהן בצבע כחול. כמה שקיות כחולות יש?', opts:['8','10','12','14'], a:2, e:'16 כפול 3/4 שווה 12.'},
+  {q:'חצי קופסה של גלגלים חולקה ל-5 ילדים שווה בשווה. איזה חלק מקופסה מלאה קיבל כל ילד?', opts:['1/10','1/8','1/5','2/5'], a:0, e:'1/2 חלקי 5 שווה 1/10.'}
+];
+const quiz = document.getElementById('quiz');
+questions.forEach((item, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<div class="q">${i+1}. ${item.q}</div><div class="opts">${item.opts.map((opt,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`).join('')}</div><div class="explain" id="exp${i}"></div>`;
+  quiz.appendChild(card);
+});
+function gradeQuiz(){
+  let score = 0;
+  questions.forEach((item,i)=>{
+    const chosen = document.querySelector(`input[name="q${i}"]:checked`);
+    const exp = document.getElementById(`exp${i}`);
+    if(chosen && Number(chosen.value)===item.a){ score++; exp.textContent = 'נכון! ' + item.e; exp.style.color = '#166534'; }
+    else { exp.textContent = 'כמעט. ' + item.e; exp.style.color = '#b45309'; }
+  });
+  document.getElementById('result').textContent = `הניקוד שלך: ${score} מתוך ${questions.length}`;
+}
+function resetQuiz(){
+  document.querySelectorAll('input[type="radio"]').forEach(x=>x.checked=false);
+  document.querySelectorAll('.explain').forEach(x=>x.textContent='');
+  document.getElementById('result').textContent='';
+}
+</script>
+</body>
+</html>
